@@ -285,6 +285,147 @@ async function saveResultAsync(res) {
 }
 
 // ============================================
+// TEAMS CRUD
+// ============================================
+async function getTeamsAsync() {
+  return await fetchTeams();
+}
+
+async function getTeamByIdAsync(id) {
+  const teams = await getTeamsAsync();
+  return teams.find(t => t.id === id) || null;
+}
+
+async function createTeamAsync(teamData) {
+  const { data, error } = await supabase.from('teams').insert([{
+    name: teamData.name.trim(),
+    emoji: teamData.emoji || '🏏',
+    color: teamData.color || randomColor(),
+    players: teamData.players || []
+  }]).select();
+
+  if (data) await fetchTeams();
+  return data ? data[0] : null;
+}
+
+async function updateTeamAsync(id, updates) {
+  const { error } = await supabase.from('teams').update({
+    name: updates.name,
+    emoji: updates.emoji,
+    color: updates.color,
+    players: updates.players
+  }).eq('id', id);
+
+  if (!error) await fetchTeams();
+  return !error;
+}
+
+async function deleteTeamAsync(id) {
+  const { error } = await supabase.from('teams').delete().eq('id', id);
+  if (!error) {
+    await Promise.all([fetchTeams(), fetchMatches(), fetchResults()]);
+  }
+  return !error;
+}
+
+// ============================================
+// MATCHES CRUD
+// ============================================
+async function getMatchesAsync() {
+  return await fetchMatches();
+}
+
+async function getMatchByIdAsync(id) {
+  const matches = await getMatchesAsync();
+  return matches.find(m => m.id === id) || null;
+}
+
+async function createMatchAsync(matchData) {
+  const { data, error } = await supabase.from('matches').insert([{
+    team1_id: matchData.team1Id,
+    team2_id: matchData.team2Id,
+    match_date: matchData.date || null,
+    match_time: matchData.time || null,
+    venue: matchData.venue || '',
+    round: matchData.round || 'Round 1',
+    status: 'scheduled'
+  }]).select();
+
+  if (data) await fetchMatches();
+  return data ? data[0] : null;
+}
+
+async function updateMatchAsync(id, updates) {
+  const { error } = await supabase.from('matches').update({
+    team1_id: updates.team1Id,
+    team2_id: updates.team2Id,
+    match_date: updates.date,
+    match_time: updates.time,
+    venue: updates.venue,
+    round: updates.round
+  }).eq('id', id);
+
+  if (!error) await fetchMatches();
+  return !error;
+}
+
+async function deleteMatchAsync(id) {
+  const { error } = await supabase.from('matches').delete().eq('id', id);
+  if (!error) await Promise.all([fetchMatches(), fetchResults()]);
+  return !error;
+}
+
+// ============================================
+// RESULTS / SCORES
+// ============================================
+async function getResultsAsync() {
+  return await fetchResults();
+}
+
+async function getResultByMatchIdAsync(matchId) {
+  const results = await getResultsAsync();
+  return results.find(r => r.matchId === matchId) || null;
+}
+
+async function saveResultAsync(res) {
+  const resultObj = {
+    match_id: res.matchId,
+    team1_id: res.team1Id,
+    team2_id: res.team2Id,
+    team1_runs: parseInt(res.team1Runs) || 0,
+    team1_wickets: parseInt(res.team1Wickets) || 0,
+    team1_overs: parseFloat(res.team1Overs) || 0,
+    team2_runs: parseInt(res.team2Runs) || 0,
+    team2_wickets: parseInt(res.team2Wickets) || 0,
+    team2_overs: parseFloat(res.team2Overs) || 0,
+    winner_id: res.winnerId || null,
+    is_draw: res.isDraw || false,
+    notes: res.notes || '',
+    team1_player_scores: res.team1PlayerScores || [],
+    team2_player_scores: res.team2PlayerScores || [],
+    saved_at: new Date().toISOString()
+  };
+
+  // Check if exists
+  const { data: existing } = await supabase.from('results').select('match_id').eq('match_id', res.matchId).single();
+
+  let error;
+  if (existing) {
+    const { error: err } = await supabase.from('results').update(resultObj).eq('match_id', res.matchId);
+    error = err;
+  } else {
+    const { error: err } = await supabase.from('results').insert([resultObj]);
+    error = err;
+  }
+
+  if (!error) {
+    await supabase.from('matches').update({ status: 'completed' }).eq('id', res.matchId);
+    await Promise.all([fetchResults(), fetchMatches()]);
+  }
+  return !error;
+}
+
+// ============================================
 // CALCULATIONS (STILL SYNC BUT USE CACHE)
 // ============================================
 
