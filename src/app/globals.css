@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0f0d;
+  --foreground: #f0f7f4;
+  --primary: #d4af37;
+  /* Gold */
+  --secondary: #004d40;
+  /* Emerald Green */
+  --accent: #ffd700;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --selection: #00796b;
+}
+
+@theme {
+  --color-background-custom: var(--background);
+  --color-foreground-custom: var(--foreground);
+  --color-primary-gold: var(--primary);
+  --color-emerald-deep: var(--secondary);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+/* Ramadan Accent Gradient */
+.ramadan-gradient {
+  background: linear-gradient(135deg, #004d40 0%, #00241a 100%);
+}
+
+.gold-text {
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
