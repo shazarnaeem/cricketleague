@@ -108,7 +108,6 @@
             const overlay = document.getElementById('loadingOverlay');
             try {
                 await renderStandings();
-                renderSettingsInfo();
             } catch (e) {
                 console.error('Standings Load Error:', e);
                 showToast('Standings load nahi ho saki.', 'error');
@@ -148,10 +147,13 @@
             <td style="font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:600; color:var(--cyan-primary);">${team.nrr}</td>
         </tr>
     `).join('');
+
+            // Now render settings info using cached data (already loaded by getStandingsAsync)
+            renderSettingsInfo(_cachedData.settings);
         }
 
-        function renderSettingsInfo() {
-            const settings = getSettings();
+        function renderSettingsInfo(settings) {
+            if (!settings) return;
             const container = document.getElementById('pointsSystemInfo');
             container.innerHTML = `
     <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:var(--radius-md); border:1px solid var(--border-glass);">
