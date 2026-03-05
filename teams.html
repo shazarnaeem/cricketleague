@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teams & Players — PUBGM WOW Ramadan Cricket Showdown</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <div class="app-layout">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="sidebar-logo">
+                    <div class="logo-icon">🏏</div>
+                    <div class="logo-text">
+                        <span class="brand">PUBGM WOW</span>
+                        <span class="sub">Ramadan Cricket Showdown</span>
+                    </div>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <span class="nav-section-label">Main</span>
+                <a href="index.html" class="nav-link"><span class="nav-icon">🏠</span> Dashboard</a>
+                <a href="standings.html" class="nav-link"><span class="nav-icon">📊</span> Points Table</a>
+                <a href="bracket.html" class="nav-link"><span class="nav-icon">🏆</span> Tournament Bracket</a>
+                <span class="nav-section-label">Management</span>
+                <a href="teams.html" class="nav-link"><span class="nav-icon">👥</span> Teams & Players</a>
+                <a href="matches.html" class="nav-link"><span class="nav-icon">📅</span> Matches / Schedule</a>
+                <a href="score.html" class="nav-link"><span class="nav-icon">🏏</span> Score Entry</a>
+                <span class="nav-section-label">Insights</span>
+                <a href="stats.html" class="nav-link"><span class="nav-icon">📈</span> Player Stats</a>
+                <a href="settings.html" class="nav-link"><span class="nav-icon">⚙️</span> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <p class="tournament-name-small"><strong>PUBGM WOW Ramadan Cricket Showdown</strong>Double Wicket
+                    Tournament</p>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div class="page-title-area">
+                    <h1>👥 Teams & Players</h1>
+                    <p>Manage participating teams and their players</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="addTeamBtn">➕ Add Team</button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <div class="teams-grid" id="teamsGrid">
+                    <!-- Filled by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Team Modal -->
+    <div class="modal-overlay" id="teamModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="teamModalTitle">Add Team</div>
+                <button class="modal-close" id="teamModalClose">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editTeamId" />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Team Name *</label>
+                        <input class="form-control" id="teamName" placeholder="e.g. Green Warriors" maxlength="30" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Team Emoji</label>
+                        <input class="form-control" id="teamEmoji" placeholder="🏏" maxlength="5" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Team Color</label>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;" id="colorPicker">
+                        <input type="color" id="teamColorCustom" class="form-control"
+                            style="width:50px; height:40px; padding:4px; cursor:pointer;" value="#22c55e" />
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid var(--border-glass); margin: 16px 0;"></div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <div
+                        style="font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; color:var(--text-primary);">
+                        🏏 Players</div>
+                    <button class="btn btn-outline btn-sm" id="addPlayerBtn" type="button">+ Add Player</button>
+                </div>
+                <div id="playersContainer">
+                    <!-- Player rows added by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="teamModalCancel">Cancel</button>
+                <button class="btn btn-primary" id="saveTeamBtn">💾 Save Team</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Players Modal -->
+    <div class="modal-overlay" id="viewPlayersModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="viewPlayersTitle">Team Players</div>
+                <button class="modal-close" id="viewPlayersClose">✕</button>
+            </div>
+            <div class="modal-body" id="viewPlayersBody">
+                <!-- Players list -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="viewPlayersCancel">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay"
+        style="position:fixed; inset:0; background:rgba(5,22,26,0.9); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+        <div class="logo-icon animate-pulse"
+            style="font-size:50px; background:linear-gradient(135deg,var(--yellow-primary),var(--cyan-primary)); width:80px; height:80px; border-radius:15px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-yellow);">
+            🏏</div>
+        <div
+            style="font-family:'Rajdhani',sans-serif; color:var(--cyan-primary); font-size:18px; letter-spacing:2px; font-weight:700;">
+            SYNCING LIVE DATA...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let currentPlayers = [];
+        let editingTeamId = null;
+
+        const PRESET_COLORS = ['#00f2ff', '#ffcc00', '#ffd700', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#a855f7'];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const overlay = document.getElementById('loadingOverlay');
+            try {
+                await renderTeams();
+            } catch (e) {
+                console.error('Teams Load Error:', e);
+                showToast('Teams Load fail ho gaya. DB Check karein.', 'error');
+            } finally {
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.style.display = 'none', 300);
+                }
+            }
+
+            document.getElementById('addTeamBtn').addEventListener('click', () => openTeamModal());
+            document.getElementById('teamModalClose').addEventListener('click', closeTeamModal);
+            document.getElementById('teamModalCancel').addEventListener('click', closeTeamModal);
+            document.getElementById('saveTeamBtn').addEventListener('click', saveTeam);
+            document.getElementById('addPlayerBtn').addEventListener('click', addPlayerRow);
+            document.getElementById('viewPlayersClose').addEventListener('click', () => closeModal('viewPlayersModal'));
+            document.getElementById('viewPlayersCancel').addEventListener('click', () => closeModal('viewPlayersModal'));
+
+            // Color preset buttons
+            const cp = document.getElementById('colorPicker');
+            PRESET_COLORS.forEach(c => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.style.cssText = `width:32px;height:32px;background:${c};border:2px solid transparent;border-radius:8px;cursor:pointer;transition:all 0.2s;`;
+                btn.onclick = () => {
+                    document.getElementById('teamColorCustom').value = c;
+                    document.querySelectorAll('#colorPicker button').forEach(b => b.style.borderColor = 'transparent');
+                    btn.style.borderColor = '#fff';
+                };
+                btn.onmouseover = () => btn.style.transform = 'scale(1.15)';
+                btn.onmouseout = () => btn.style.transform = 'scale(1)';
+                cp.insertBefore(btn, cp.firstChild);
+            });
+        });
+
+        async function renderTeams() {
+            const teams = await getTeamsAsync();
+            const grid = document.getElementById('teamsGrid');
+            if (teams.length === 0) {
+                grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon">👥</div>
+        <h3>No Teams Yet</h3>
+        <p>Add teams to get started with your tournament.</p>
+        <button class="btn btn-primary" onclick="openTeamModal()">➕ Add First Team</button>
+      </div>
+    `;
+                return;
+            }
+            grid.innerHTML = teams.map(team => `
+    <div class="team-card animate-in">
+      <div class="team-card-header">
+        <div class="team-avatar" style="background:linear-gradient(135deg,${team.color}44,${team.color}88);">
+          ${team.emoji}
+        </div>
+        <div class="team-info">
+          <div class="team-name">${team.name}</div>
+          <div class="team-meta">${(team.players || []).length} player(s)</div>
+        </div>
+        <div class="team-card-actions">
+          <button class="btn btn-outline btn-icon" title="Edit" onclick="openTeamModal('${team.id}')">✏️</button>
+          <button class="btn btn-danger btn-icon" title="Delete" onclick="deleteTeamConfirm('${team.id}')">🗑️</button>
+        </div>
+      </div>
+      <div class="team-card-body">
+        ${renderPlayerList(team.players || [], team.color)}
+        ${(team.players || []).length === 0 ? '<p style="font-size:13px;color:var(--text-muted);text-align:center;padding:8px;">No players added. Click Edit to add players.</p>' : ''}
+      </div>
+    </div>
+  `).join('');
+        }
+
+        function renderPlayerList(players, color) {
+            if (players.length === 0) return '';
+            return `<div class="player-list">` + players.map(p => {
+                const roleColor = { Batsman: 'badge-green', Bowler: 'badge-red', 'All-rounder': 'badge-blue', 'Wicket-Keeper': 'badge-gold' };
+                return `
+      <div class="player-item">
+        <div class="player-avatar" style="background:linear-gradient(135deg,${color}88,${color})">${p.name.charAt(0).toUpperCase()}</div>
+        <div class="player-name">${p.name}${p.jerseyNo ? ` <span style="color:var(--text-muted);font-size:11px;">#${p.jerseyNo}</span>` : ''}</div>
+        <span class="badge ${roleColor[p.role] || 'badge-gray'} player-role">${p.role}</span>
+      </div>
+    `;
+            }).join('') + '</div>';
+        }
+
+        async function openTeamModal(teamId = null) {
+            editingTeamId = teamId;
+            currentPlayers = [];
+            document.getElementById('teamModalTitle').textContent = teamId ? 'Edit Team' : 'Add Team';
+            document.getElementById('editTeamId').value = teamId || '';
+            document.getElementById('playersContainer').innerHTML = '';
+
+            if (teamId) {
+                const team = await getTeamByIdAsync(teamId);
+                if (team) {
+                    document.getElementById('teamName').value = team.name;
+                    document.getElementById('teamEmoji').value = team.emoji || '🏏';
+                    document.getElementById('teamColorCustom').value = team.color || '#22c55e';
+                    currentPlayers = JSON.parse(JSON.stringify(team.players || []));
+                    currentPlayers.forEach((p, i) => addPlayerRow(null, p, i));
+                }
+            } else {
+                document.getElementById('teamName').value = '';
+                document.getElementById('teamEmoji').value = '🏏';
+                document.getElementById('teamColorCustom').value = '#00f2ff';
+            }
+
+            openModal('teamModal');
+        }
+
+        function addPlayerRow(e, playerData = null, idx = null) {
+            const container = document.getElementById('playersContainer');
+            const id = idx !== null ? idx : currentPlayers.length;
+            if (!playerData) {
+                playerData = { id: generateId(), name: '', role: 'Batsman', jerseyNo: '' };
+                currentPlayers.push(playerData);
+            }
+            const row = document.createElement('div');
+            row.setAttribute('data-player-idx', id);
+            row.style.cssText = 'display:grid; grid-template-columns:1fr 130px 70px auto; gap:8px; margin-bottom:10px; align-items:center;';
+            row.innerHTML = `
+    <input class="form-control" placeholder="Player name" value="${playerData.name || ''}" onchange="updatePlayer(${id},'name',this.value)" style="margin:0;" />
+    <select class="form-control" onchange="updatePlayer(${id},'role',this.value)" style="margin:0;">
+      ${['Batsman', 'Bowler', 'All-rounder', 'Wicket-Keeper'].map(r => `<option ${playerData.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+    </select>
+    <input class="form-control" placeholder="#No" value="${playerData.jerseyNo || ''}" onchange="updatePlayer(${id},'jerseyNo',this.value)" style="margin:0;" maxlength="3" />
+    <button class="btn btn-danger btn-icon btn-sm" onclick="removePlayerRow(this,${id})" type="button" style="flex-shrink:0;">✕</button>
+  `;
+            container.appendChild(row);
+        }
+
+        function updatePlayer(idx, field, value) {
+            if (currentPlayers[idx]) currentPlayers[idx][field] = value;
+        }
+
+        function removePlayerRow(btn, idx) {
+            btn.closest('[data-player-idx]').remove();
+            currentPlayers[idx] = null;
+        }
+
+        async function saveTeam() {
+            const name = document.getElementById('teamName').value.trim();
+            if (!name) { showToast('Team name zaroori hai!', 'error'); return; }
+
+            const btn = document.getElementById('saveTeamBtn');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = 'Saving...';
+            btn.disabled = true;
+
+            const teamData = {
+                name,
+                emoji: document.getElementById('teamEmoji').value.trim() || '🏏',
+                color: document.getElementById('teamColorCustom').value,
+                players: currentPlayers.filter(Boolean).filter(p => p.name.trim()),
+            };
+
+            try {
+                if (editingTeamId) {
+                    await updateTeamAsync(editingTeamId, teamData);
+                    showToast('Team update ho gayi! ✅');
+                } else {
+                    await createTeamAsync(teamData);
+                    showToast('New team add ho gayi! 🎉');
+                }
+                closeTeamModal();
+                await renderTeams();
+            } catch (e) {
+                showToast('Error save karne mein.', 'error');
+            } finally {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteTeamConfirm(teamId) {
+            if (confirmAction(`Team delete karna chahte hain?`)) {
+                await deleteTeamAsync(teamId);
+                showToast('Team delete ho gayi!', 'info');
+                await renderTeams();
+            }
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function closeTeamModal() { closeModal('teamModal'); }
+    </script>
+</body>
+
+</html>
